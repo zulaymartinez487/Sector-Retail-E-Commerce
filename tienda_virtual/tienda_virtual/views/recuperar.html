@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Recuperar Contraseña - {{ app_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="contenedor">
+        <h1>☁️ {{ app_name }}</h1>
+        <h2>Recuperar contraseña</h2>
+
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+            {% if mensajes %}
+                {% for categoria, mensaje in mensajes %}
+                    <div class="alerta alerta-{{ categoria }}">{{ mensaje }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <p style="font-size:14px; color:#555; text-align:left;">
+            Ingresa el correo con el que te registraste y te enviaremos
+            un enlace para crear una nueva contraseña.
+        </p>
+
+        <form method="POST" action="{{ url_for('auth.recuperar_contrasena') }}">
+            <label for="correo">Correo electrónico</label>
+            <input type="email" id="correo" name="correo" required>
+
+            <button type="submit">Enviar enlace</button>
+        </form>
+
+        <p><a href="{{ url_for('auth.login') }}">Volver a iniciar sesión</a></p>
+    </div>
+</body>
+</html>

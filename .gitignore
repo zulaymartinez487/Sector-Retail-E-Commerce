@@ -1,0 +1,25 @@
+# Variables de entorno con credenciales reales (NUNCA subir esto)
+.env
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+env/
+.venv/
+
+# Logs de la app (pueden contener correos/IDs de usuarios)
+logs/
+*.log
+
+# Archivos de Claude Code (no forman parte del proyecto)
+.claude/
+
+# Editor / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
