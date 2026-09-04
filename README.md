@@ -1,2 +1,2 @@
-# Sector-Retail-E-Commerce
+# Retail-E-Commerce
 Patrones Software - Proyecto
