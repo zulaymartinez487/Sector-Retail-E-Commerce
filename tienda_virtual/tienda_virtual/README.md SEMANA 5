@@ -1,10 +1,11 @@
-# Tienda Virtual - Login (MVC + Singleton + Factory Method)
+# Tienda Virtual - Login (MVC + Singleton + Factory Method + Builder)
 
 Proyecto en Python (Flask) que implementa un login para una tienda virtual,
 usando el patrón de diseño **Modelo-Vista-Controlador (MVC)**, el patrón
-**Singleton** para la conexión a la base de datos `bdaverd`, y el patrón
-**Factory Method** en el envío de notificaciones de recuperación de
-contraseña.
+**Singleton** para la conexión a la base de datos `bdaverd`, el patrón
+**Factory Method** para decidir cómo notificar al usuario (correo real o
+consola), y el patrón **Builder** para armar el cuerpo HTML de esos
+correos paso a paso.
 
 ## 📂 Estructura del proyecto
 
@@ -22,6 +23,7 @@ tienda_virtual/
 │   └── auth_controller.py   # CONTROLADOR: rutas de login, registro, logout
 ├── utils/
 │   ├── notificador.py       # Notificador (interfaz) + NotificadorFactory -> FACTORY METHOD
+│   ├── correo_builder.py    # CorreoBuilder -> patrón BUILDER
 │   └── logger.py            # Clase Logger -> patrón SINGLETON
 ├── views/
 │   ├── login.html           # VISTA: formulario de inicio de sesión
@@ -55,9 +57,38 @@ que el controlador (`auth_controller.py`) tenga que conocerlas:
   y registra el enlace en el log, para poder seguir probando el flujo.
 
 ```python
-notificador = NotificadorFactory.crear_notificador()  # decide la clase concreta
-notificador.enviar(correo, nombre, enlace)             # el controlador solo usa la interfaz
+notificador = NotificadorFactory.crear_notificador()             # decide la clase concreta
+notificador.enviar_recuperacion(correo, nombre, enlace)          # el controlador solo usa la interfaz
 ```
+
+`Notificador` también expone `enviar_bienvenida()` (registro),
+`enviar_alerta_login()` (login) y `enviar_confirmacion_restablecimiento()`
+(tras restablecer la contraseña) — mismos dos "sabores" (`NotificadorEmail` /
+`NotificadorConsola`) para cada evento de la cuenta.
+
+## 🧱 Patrón Builder
+
+En `utils/correo_builder.py`, `CorreoBuilder` arma el cuerpo HTML de cada
+correo **paso a paso**, en vez de escribir todo el HTML de una sola vez en
+un f-string gigante. Cada método `con_...` agrega una pieza y devuelve el
+mismo builder (se pueden encadenar), y `construir()` entrega el HTML final:
+
+```python
+cuerpo_html = (
+    CorreoBuilder()
+    .con_encabezado("CloudMarket")
+    .con_saludo("Zulay")
+    .con_parrafo("Recibimos una solicitud para restablecer tu contraseña.")
+    .con_boton("Restablecer contraseña", enlace)
+    .con_pie()
+    .construir()
+)
+```
+
+`NotificadorEmail` usa este builder internamente en sus 4 métodos
+(`enviar_bienvenida`, `enviar_alerta_login`, `enviar_recuperacion`,
+`enviar_confirmacion_restablecimiento`), cada uno combinando las piezas
+que necesita.
 
 ## 🚀 Instalación y ejecución
 

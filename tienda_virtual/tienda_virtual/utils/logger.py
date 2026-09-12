@@ -1,9 +1,7 @@
 import logging
 import os
 
-
 class Logger:
-    
 
     _instancia = None
 

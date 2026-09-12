@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+from utils.correo_builder import CorreoBuilder
 from utils.logger import Logger
 
 logger = Logger()
@@ -73,53 +74,51 @@ class NotificadorEmail(Notificador):
             return False
 
     def enviar_bienvenida(self, destinatario, nombre):
-        cuerpo_html = f"""
-        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto;">
-            <h2 style="color:#1e3c72;">☁️ {NOMBRE_APP}</h2>
-            <p>¡Hola {nombre}!</p>
-            <p>Tu cuenta se creó correctamente. Ya puedes iniciar sesión y comenzar a comprar.</p>
-        </div>
-        """
+        cuerpo_html = (
+            CorreoBuilder()
+            .con_encabezado(NOMBRE_APP)
+            .con_saludo(nombre)
+            .con_parrafo("Tu cuenta se creó correctamente. Ya puedes iniciar sesión y comenzar a comprar.")
+            .con_pie()
+            .construir()
+        )
         return self._enviar_correo(destinatario, f"¡Bienvenido a {NOMBRE_APP}!", cuerpo_html)
 
     def enviar_alerta_login(self, destinatario, nombre):
-        cuerpo_html = f"""
-        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto;">
-            <h2 style="color:#1e3c72;">☁️ {NOMBRE_APP}</h2>
-            <p>Hola {nombre},</p>
-            <p>Detectamos un inicio de sesión en tu cuenta. Si fuiste tú, no necesitas hacer nada.</p>
-            <p>Si no reconoces esta actividad, te recomendamos restablecer tu contraseña de inmediato.</p>
-        </div>
-        """
+        cuerpo_html = (
+            CorreoBuilder()
+            .con_encabezado(NOMBRE_APP)
+            .con_saludo(nombre)
+            .con_parrafo("Detectamos un inicio de sesión en tu cuenta. Si fuiste tú, no necesitas hacer nada.")
+            .con_parrafo("Si no reconoces esta actividad, te recomendamos restablecer tu contraseña de inmediato.")
+            .con_pie()
+            .construir()
+        )
         return self._enviar_correo(destinatario, f"Nuevo inicio de sesión - {NOMBRE_APP}", cuerpo_html)
 
     def enviar_recuperacion(self, destinatario, nombre, enlace):
-        cuerpo_html = f"""
-        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto;">
-            <h2 style="color:#1e3c72;">☁️ {NOMBRE_APP}</h2>
-            <p>Hola {nombre},</p>
-            <p>Recibimos una solicitud para restablecer tu contraseña. Haz clic en el siguiente botón:</p>
-            <p style="text-align:center;">
-                <a href="{enlace}"
-                   style="background:#1e3c72; color:#fff; padding:12px 20px;
-                          border-radius:6px; text-decoration:none; display:inline-block;">
-                    Restablecer contraseña
-                </a>
-            </p>
-            <p>Este enlace expira en 30 minutos. Si tú no solicitaste este cambio, puedes ignorar este correo.</p>
-        </div>
-        """
+        cuerpo_html = (
+            CorreoBuilder()
+            .con_encabezado(NOMBRE_APP)
+            .con_saludo(nombre)
+            .con_parrafo("Recibimos una solicitud para restablecer tu contraseña. Haz clic en el siguiente botón:")
+            .con_boton("Restablecer contraseña", enlace)
+            .con_parrafo("Este enlace expira en 30 minutos. Si tú no solicitaste este cambio, puedes ignorar este correo.")
+            .con_pie()
+            .construir()
+        )
         return self._enviar_correo(destinatario, f"Recuperación de contraseña - {NOMBRE_APP}", cuerpo_html)
 
     def enviar_confirmacion_restablecimiento(self, destinatario, nombre):
-        cuerpo_html = f"""
-        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto;">
-            <h2 style="color:#1e3c72;">☁️ {NOMBRE_APP}</h2>
-            <p>Hola {nombre},</p>
-            <p>Tu contraseña se actualizó correctamente. Ya puedes iniciar sesión con la nueva contraseña.</p>
-            <p>Si tú no hiciste este cambio, contacta al soporte de inmediato.</p>
-        </div>
-        """
+        cuerpo_html = (
+            CorreoBuilder()
+            .con_encabezado(NOMBRE_APP)
+            .con_saludo(nombre)
+            .con_parrafo("Tu contraseña se actualizó correctamente. Ya puedes iniciar sesión con la nueva contraseña.")
+            .con_parrafo("Si tú no hiciste este cambio, contacta al soporte de inmediato.")
+            .con_pie()
+            .construir()
+        )
         return self._enviar_correo(destinatario, f"Contraseña actualizada - {NOMBRE_APP}", cuerpo_html)
 
 
