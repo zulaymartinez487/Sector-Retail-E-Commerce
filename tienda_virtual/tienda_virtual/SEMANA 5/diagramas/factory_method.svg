@@ -1,0 +1,66 @@
+<svg viewBox="0 0 882 684" width="882" height="684" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama UML del patrón Factory Method: NotificadorFactory crea NotificadorEmail o NotificadorConsola, ambas implementaciones de Notificador">
+<rect x="0" y="0" width="882" height="684" fill="#f5f7fa"/>
+
+<defs>
+  <marker id="gen" markerWidth="16" markerHeight="14" refX="15" refY="7" orient="auto">
+    <polygon points="0,0 16,7 0,14" fill="#ffffff" stroke="#1a2233" stroke-width="1.2"/>
+  </marker>
+  <marker id="dep" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto">
+    <polyline points="0,0 10,5 0,10" fill="none" stroke="#1a2233" stroke-width="1.3"/>
+  </marker>
+</defs>
+
+<path d="M233.2,286 L233.2,236 L313.16,236 L313.16,220" fill="none" stroke="#1a2233" stroke-width="1.3" marker-end="url(#gen)"/>
+<path d="M534.8,286 L534.8,252 L454.84000000000003,252 L454.84000000000003,220" fill="none" stroke="#1a2233" stroke-width="1.3" marker-end="url(#gen)"/>
+<line x1="384.0" y1="556" x2="384.0" y2="220" stroke="#1a2233" stroke-width="1.3" stroke-dasharray="5,4" marker-end="url(#dep)"/>
+<text x="394.0" y="508.0" text-anchor="start" font-family="IBM Plex Mono, monospace" font-style="italic" font-size="11.5" fill="#1a2233" opacity="0.8">«crea»</text>
+<g transform="translate(223.0,50)">
+<rect x="0" y="0" width="322" height="170" rx="6" fill="#ffffff" stroke="#1a2233" stroke-width="1.3"/>
+<text x="161.0" y="21" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-style="italic" font-size="11.5" fill="#1a2233" opacity="0.72">«abstract»</text>
+<text x="161.0" y="40" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-style="italic" font-size="15" fill="#1a2233">Notificador</text>
+<line x1="0" y1="56" x2="322" y2="56" stroke="#1a2233" stroke-width="1"/>
+<line x1="0" y1="85" x2="322" y2="85" stroke="#1a2233" stroke-width="1"/>
+<text x="14" y="99" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233" font-style="italic"><tspan fill="#1a2233" opacity="0.6">+</tspan> enviar_bienvenida()</text>
+<text x="14" y="118" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233" font-style="italic"><tspan fill="#1a2233" opacity="0.6">+</tspan> enviar_alerta_login()</text>
+<text x="14" y="137" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233" font-style="italic"><tspan fill="#1a2233" opacity="0.6">+</tspan> enviar_recuperacion()</text>
+<text x="14" y="156" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233" font-style="italic"><tspan fill="#1a2233" opacity="0.6">+</tspan> enviar_confirmacion_restablecimiento()</text>
+</g>
+<g transform="translate(40,286)">
+<rect x="0" y="0" width="322" height="174" rx="6" fill="#ffffff" stroke="#1a2233" stroke-width="1.3"/>
+<text x="161.0" y="24" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700"  font-size="15" fill="#1a2233">NotificadorEmail</text>
+<line x1="0" y1="40" x2="322" y2="40" stroke="#1a2233" stroke-width="1"/>
+<line x1="0" y1="69" x2="322" y2="69" stroke="#1a2233" stroke-width="1"/>
+<text x="14" y="83" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233"><tspan fill="#1a2233" opacity="0.6">-</tspan> _enviar_correo()</text>
+<text x="14" y="102" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233"><tspan fill="#1a2233" opacity="0.6">+</tspan> enviar_bienvenida()</text>
+<text x="14" y="121" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233"><tspan fill="#1a2233" opacity="0.6">+</tspan> enviar_alerta_login()</text>
+<text x="14" y="140" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233"><tspan fill="#1a2233" opacity="0.6">+</tspan> enviar_recuperacion()</text>
+<text x="14" y="159" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233"><tspan fill="#1a2233" opacity="0.6">+</tspan> enviar_confirmacion_restablecimiento()</text>
+</g>
+<g transform="translate(406,286)">
+<rect x="0" y="0" width="322" height="174" rx="6" fill="#ffffff" stroke="#1a2233" stroke-width="1.3"/>
+<text x="161.0" y="24" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700"  font-size="15" fill="#1a2233">NotificadorConsola</text>
+<line x1="0" y1="40" x2="322" y2="40" stroke="#1a2233" stroke-width="1"/>
+<line x1="0" y1="69" x2="322" y2="69" stroke="#1a2233" stroke-width="1"/>
+<text x="14" y="83" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233"><tspan fill="#1a2233" opacity="0.6">-</tspan> _registrar()</text>
+<text x="14" y="102" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233"><tspan fill="#1a2233" opacity="0.6">+</tspan> enviar_bienvenida()</text>
+<text x="14" y="121" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233"><tspan fill="#1a2233" opacity="0.6">+</tspan> enviar_alerta_login()</text>
+<text x="14" y="140" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233"><tspan fill="#1a2233" opacity="0.6">+</tspan> enviar_recuperacion()</text>
+<text x="14" y="159" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233"><tspan fill="#1a2233" opacity="0.6">+</tspan> enviar_confirmacion_restablecimiento()</text>
+</g>
+<g transform="translate(245.0,556)">
+<rect x="0" y="0" width="278" height="98" rx="6" fill="#ffffff" stroke="#1a2233" stroke-width="1.3"/>
+<text x="139.0" y="24" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700"  font-size="15" fill="#1a2233">NotificadorFactory</text>
+<line x1="0" y1="40" x2="278" y2="40" stroke="#1a2233" stroke-width="1"/>
+<line x1="0" y1="69" x2="278" y2="69" stroke="#1a2233" stroke-width="1"/>
+<text x="14" y="83" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233" text-decoration="underline"><tspan fill="#1a2233" opacity="0.6">+</tspan> crear_notificador(): Notificador</text>
+</g>
+<g transform="translate(553.0,559.0)">
+<path d="M0,0 H277 L289,12 V92 H0 Z" fill="#eef1f6" stroke="#1a2233" stroke-width="1" opacity="0.97"/>
+<path d="M277,0 V12 H289" fill="none" stroke="#1a2233" stroke-width="1"/>
+<text x="12" y="20" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#1a2233" opacity="0.85">Decide, según haya credenciales SMTP</text>
+<text x="12" y="36" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#1a2233" opacity="0.85">en el .env, si crea un NotificadorEmail</text>
+<text x="12" y="52" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#1a2233" opacity="0.85">o un NotificadorConsola. Quien la usa</text>
+<text x="12" y="68" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#1a2233" opacity="0.85">solo conoce la interfaz Notificador.</text>
+</g>
+<line x1="523.0" y1="605.0" x2="553.0" y2="605.0" stroke="#1a2233" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"/>
+</svg>
