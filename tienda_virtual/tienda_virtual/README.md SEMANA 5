@@ -1,11 +1,13 @@
-# Tienda Virtual - Login (MVC + Singleton + Factory Method + Builder)
+# Tienda Virtual - Login (MVC + Singleton + Factory Method + Abstract Factory + Builder + Prototype)
 
 Proyecto en Python (Flask) que implementa un login para una tienda virtual,
-usando el patrón de diseño **Modelo-Vista-Controlador (MVC)**, el patrón
-**Singleton** para la conexión a la base de datos `bdaverd`, el patrón
-**Factory Method** para decidir cómo notificar al usuario (correo real o
-consola), y el patrón **Builder** para armar el cuerpo HTML de esos
-correos paso a paso.
+usando el patrón de diseño **Modelo-Vista-Controlador (MVC)** y cinco
+patrones creacionales: **Singleton** para la conexión a la base de datos
+`bdaverd`, **Factory Method** para decidir cómo notificar al usuario (correo
+real o consola), **Abstract Factory** para armar la familia de piezas
+visuales (color + ícono) de cada tipo de correo, **Builder** para construir
+el cuerpo HTML de esos correos paso a paso, y **Prototype** para reutilizar
+(clonando) el encabezado ya armado de cada tema en vez de reconstruirlo.
 
 ## 📂 Estructura del proyecto
 
@@ -23,7 +25,9 @@ tienda_virtual/
 │   └── auth_controller.py   # CONTROLADOR: rutas de login, registro, logout
 ├── utils/
 │   ├── notificador.py       # Notificador (interfaz) + NotificadorFactory -> FACTORY METHOD
-│   ├── correo_builder.py    # CorreoBuilder -> patrón BUILDER
+│   ├── tema_correo.py       # TemaCorreoFactory + TemaEstandarFactory/TemaSeguridadFactory -> ABSTRACT FACTORY
+│   ├── correo_builder.py    # CorreoBuilder -> patrón BUILDER (+ clonar() -> PROTOTYPE)
+│   ├── plantillas_correo.py # RegistroPlantillasCorreo -> patrón PROTOTYPE
 │   └── logger.py            # Clase Logger -> patrón SINGLETON
 ├── views/
 │   ├── login.html           # VISTA: formulario de inicio de sesión
@@ -66,6 +70,28 @@ notificador.enviar_recuperacion(correo, nombre, enlace)          # el controlado
 (tras restablecer la contraseña) — mismos dos "sabores" (`NotificadorEmail` /
 `NotificadorConsola`) para cada evento de la cuenta.
 
+## 🏛️ Patrón Abstract Factory
+
+En `utils/tema_correo.py`, `TemaCorreoFactory` es una fábrica abstracta que
+crea una **familia de piezas visuales relacionadas** (color + ícono) que
+deben quedar siempre coherentes entre sí. A diferencia de
+`NotificadorFactory` (que elige entre canales sueltos: correo o consola),
+esta fábrica arma un conjunto de productos que van juntos:
+
+- `TemaEstandarFactory` — azul `#1e3c72` + ☁️, para correos informativos
+  (bienvenida, confirmación de restablecimiento).
+- `TemaSeguridadFactory` — rojo `#b3401f` + 🔒, para correos sensibles
+  (alerta de login, recuperación de contraseña).
+
+```python
+tema = TemaSeguridadFactory()             # fábrica concreta de la familia "seguridad"
+color = tema.crear_color()                # "#b3401f"
+icono = tema.crear_icono()                # "🔒"  -> color e ícono siempre van juntos
+```
+
+`NotificadorEmail` elige la fábrica según el tipo de correo y le pasa el
+color/ícono resultante a `CorreoBuilder`.
+
 ## 🧱 Patrón Builder
 
 En `utils/correo_builder.py`, `CorreoBuilder` arma el cuerpo HTML de cada
@@ -76,10 +102,10 @@ mismo builder (se pueden encadenar), y `construir()` entrega el HTML final:
 ```python
 cuerpo_html = (
     CorreoBuilder()
-    .con_encabezado("CloudMarket")
+    .con_encabezado("CloudMarket", color="#1e3c72", icono="☁️")
     .con_saludo("Zulay")
     .con_parrafo("Recibimos una solicitud para restablecer tu contraseña.")
-    .con_boton("Restablecer contraseña", enlace)
+    .con_boton("Restablecer contraseña", enlace, color="#1e3c72")
     .con_pie()
     .construir()
 )
@@ -88,7 +114,30 @@ cuerpo_html = (
 `NotificadorEmail` usa este builder internamente en sus 4 métodos
 (`enviar_bienvenida`, `enviar_alerta_login`, `enviar_recuperacion`,
 `enviar_confirmacion_restablecimiento`), cada uno combinando las piezas
-que necesita.
+que necesita. En vez de llamar `con_encabezado()` desde cero cada vez, arranca
+desde el prototipo clonado que entrega `RegistroPlantillasCorreo` (ver
+siguiente sección).
+
+## 🧬 Patrón Prototype
+
+En `utils/correo_builder.py`, `CorreoBuilder.clonar()` devuelve una copia
+independiente del builder (con `copy.deepcopy` sobre sus piezas ya
+agregadas). En `utils/plantillas_correo.py`, `RegistroPlantillasCorreo`
+aprovecha eso: arma **una sola vez** un `CorreoBuilder` "prototipo" con el
+encabezado ya puesto para cada combinación (título, color, ícono), lo guarda
+en caché, y para cada correo nuevo entrega un **clon** de ese prototipo en
+vez de reconstruir el encabezado desde cero:
+
+```python
+builder = RegistroPlantillasCorreo.obtener_encabezado(
+    "CloudMarket", "#1e3c72", "☁️"
+)                                  # clon del prototipo (ya trae el encabezado)
+builder.con_saludo("Zulay")       # se le agregan las piezas propias de este correo
+```
+
+Como `enviar_bienvenida()` y `enviar_confirmacion_restablecimiento()` usan el
+mismo tema (`TemaEstandarFactory`), ambos reutilizan y clonan **el mismo**
+prototipo cacheado en vez de construir el encabezado dos veces.
 
 ## 🚀 Instalación y ejecución
 

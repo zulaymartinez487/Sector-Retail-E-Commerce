@@ -1,3 +1,6 @@
+import copy
+
+
 class CorreoBuilder:
     """
     PATRÓN BUILDER
@@ -14,8 +17,8 @@ class CorreoBuilder:
     def __init__(self):
         self._partes = []
 
-    def con_encabezado(self, titulo):
-        self._partes.append(f'<h2 style="color:#1e3c72;">☁️ {titulo}</h2>')
+    def con_encabezado(self, titulo, color="#1e3c72", icono="☁️"):
+        self._partes.append(f'<h2 style="color:{color};">{icono} {titulo}</h2>')
         return self
 
     def con_saludo(self, nombre):
@@ -26,11 +29,11 @@ class CorreoBuilder:
         self._partes.append(f"<p>{texto}</p>")
         return self
 
-    def con_boton(self, texto, url):
+    def con_boton(self, texto, url, color="#1e3c72"):
         self._partes.append(f"""
         <p style="text-align:center;">
             <a href="{url}"
-               style="background:#1e3c72; color:#fff; padding:12px 20px;
+               style="background:{color}; color:#fff; padding:12px 20px;
                       border-radius:6px; text-decoration:none; display:inline-block;">
                 {texto}
             </a>
@@ -53,3 +56,19 @@ class CorreoBuilder:
             f"{contenido}"
             f"</div>"
         )
+
+    def clonar(self):
+        """
+        PATRÓN PROTOTYPE
+
+        Devuelve una copia independiente de este builder, con las mismas
+        piezas que ya tiene agregadas (por ejemplo, un encabezado ya
+        armado). A partir de la copia se pueden seguir encadenando
+        con_... sin afectar al builder original: sirve para no volver a
+        construir desde cero una parte que ya se armó una vez (ver
+        utils/plantillas_correo.py, que guarda un builder "prototipo" por
+        cada tema y lo clona para cada correo nuevo).
+        """
+        copia = CorreoBuilder()
+        copia._partes = copy.deepcopy(self._partes)
+        return copia
