@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Restablecer Contraseña - {{ app_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="contenedor">
+        <h1>☁️ {{ app_name }}</h1>
+        <h2>Crea tu nueva contraseña</h2>
+
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+            {% if mensajes %}
+                {% for categoria, mensaje in mensajes %}
+                    <div class="alerta alerta-{{ categoria }}">{{ mensaje }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth.restablecer_contrasena', token=token) }}">
+            <label for="contrasena">Nueva contraseña</label>
+            <input type="password" id="contrasena" name="contrasena" required>
+
+            <label for="confirmar_contrasena">Confirmar contraseña</label>
+            <input type="password" id="confirmar_contrasena" name="confirmar_contrasena" required>
+
+            <button type="submit">Guardar nueva contraseña</button>
+        </form>
+    </div>
+</body>
+</html>
