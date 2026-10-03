@@ -1,0 +1,74 @@
+{% extends "tienda/base.html" %}
+
+{% block titulo %}{{ producto.nombre }} - {{ app_name }}{% endblock %}
+
+{% block contenido %}
+<section class="contenedor">
+    <nav class="migas">
+        <a href="{{ url_for('tienda.inicio') }}">Inicio</a> ›
+        {% for c in ruta_categorias %}
+            <a href="{{ url_for('tienda.inicio', categoria=c.nombre) }}#catalogo">{{ c.nombre }}</a> ›
+        {% endfor %}
+        <span>{{ producto.nombre }}</span>
+    </nav>
+
+    <div class="detalle">
+        <div class="detalle-imagen">
+            <img src="{{ url_for('static', filename=producto.imagen) }}" alt="{{ producto.nombre }}">
+        </div>
+
+        <div class="detalle-info">
+            <span class="tarjeta-categoria">{{ producto.categoria }}</span>
+            <h1>{{ producto.nombre }}</h1>
+            <p class="detalle-precio">{{ producto.precio | precio }}</p>
+            {% if moneda_actual != 'COP' %}
+                <p class="texto-suave">Equivale a {{ producto.precio | precio('COP') }}</p>
+            {% endif %}
+            <p class="detalle-descripcion">{{ producto.descripcion }}</p>
+
+            {% if mi_tienda and mi_tienda.id == producto.vendedor_id %}
+                <p class="stock stock-ok">Este producto es de tu tienda · {{ producto.stock }} en stock</p>
+                <a href="{{ url_for('vendedor.editar_producto', producto_id=producto.id) }}" class="boton">Editar producto</a>
+            {% elif producto.stock > 0 %}
+                <p class="stock stock-ok">✔ {{ producto.stock }} unidades disponibles</p>
+                <form method="POST" action="{{ url_for('tienda.agregar_al_carrito', producto_id=producto.id) }}" class="detalle-compra">
+                    <input type="hidden" name="volver" value="{{ request.path }}">
+                    <label for="cantidad">Cantidad</label>
+                    <input type="number" id="cantidad" name="cantidad" value="1" min="1" max="{{ producto.stock }}">
+                    <button type="submit" class="boton">Agregar al carrito</button>
+                </form>
+                {% if en_carrito %}
+                    <p class="texto-suave">Ya tienes {{ en_carrito }} en tu <a href="{{ url_for('tienda.carrito') }}">carrito</a>.</p>
+                {% endif %}
+            {% else %}
+                <p class="stock stock-agotado">Producto agotado</p>
+            {% endif %}
+
+            <a href="{{ url_for('tienda.tienda_vendedor', vendedor_id=producto.vendedor_id) }}" class="caja-vendedor">
+                <span class="caja-vendedor-avatar">{{ producto.nombre_tienda[0] }}</span>
+                <span class="caja-vendedor-info">
+                    <span class="texto-suave">Vendido por</span>
+                    <strong>{{ producto.nombre_tienda }}</strong>
+                    <span class="texto-suave">📍 Despacha desde {{ producto.ciudad_tienda }} con {{ producto.transportadora }}</span>
+                </span>
+                <span class="caja-vendedor-flecha">›</span>
+            </a>
+
+            <ul class="detalle-beneficios">
+                <li>🚚 Envío estándar gratis desde {{ 150000 | precio }} en esta tienda, o express en 1 a 2 días</li>
+                <li>📦 Sigue tu envío con número de guía en "Mis pedidos"</li>
+                <li>🔒 Paga con tarjeta, PSE, Nequi o PayPal</li>
+            </ul>
+        </div>
+    </div>
+
+    {% if relacionados %}
+        <h2 class="titulo-seccion">También te puede gustar</h2>
+        <div class="grilla">
+            {% for p in relacionados %}
+                {% include "tienda/_tarjeta_producto.html" %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

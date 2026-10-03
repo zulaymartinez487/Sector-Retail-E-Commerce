@@ -1,0 +1,85 @@
+{% extends "vendedor/base.html" %}
+
+{% block titulo %}Catálogo - {{ app_name }}{% endblock %}
+
+{% block panel %}
+<div class="panel-titulo">
+    <h1 class="titulo-pagina">Catálogo e inventario</h1>
+    <a href="{{ url_for('vendedor.nuevo_producto') }}" class="boton">➕ Publicar producto</a>
+</div>
+
+{# Reporte de inventario con el árbol Composite: cada rama suma lo de sus hijos. #}
+{% macro rama(nodo, nivel) %}
+    {% for hijo in nodo.subcategorias() if hijo.contar_productos() %}
+        <tr class="arbol-nivel-{{ nivel }}">
+            <td style="padding-left: {{ 14 + nivel * 24 }}px">{{ '📁' if hijo.subcategorias() else '📂' }} {{ hijo.nombre }}</td>
+            <td>{{ hijo.contar_productos() }}</td>
+            <td>{{ hijo.unidades_en_stock() }}</td>
+            <td>{{ hijo.valor_inventario() | precio('COP') }}</td>
+        </tr>
+        {{ rama(hijo, nivel + 1) }}
+    {% endfor %}
+{% endmacro %}
+
+{% if productos %}
+<div class="panel">
+    <div class="panel-titulo">
+        <h2>Inventario por categoría</h2>
+        <span class="texto-suave">Valor del inventario = precio × unidades en stock</span>
+    </div>
+    <div class="tabla-contenedor tabla-sin-sombra">
+        <table class="tabla tabla-arbol">
+            <thead><tr><th>Categoría</th><th>Productos</th><th>Unidades</th><th>Valor del inventario</th></tr></thead>
+            <tbody>
+                {{ rama(arbol, 0) }}
+                <tr class="fila-total">
+                    <td>Total de la tienda</td>
+                    <td>{{ arbol.contar_productos() }}</td>
+                    <td>{{ arbol.unidades_en_stock() }}</td>
+                    <td>{{ arbol.valor_inventario() | precio('COP') }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<h2 class="titulo-seccion titulo-seccion-cerca">Productos</h2>
+<div class="tabla-contenedor">
+    <table class="tabla">
+        <thead>
+            <tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th><th></th></tr>
+        </thead>
+        <tbody>
+        {% for p in productos %}
+            <tr class="{% if not p.activo %}fila-inactiva{% endif %}">
+                <td>
+                    <div class="celda-producto">
+                        <img src="{{ url_for('static', filename=p.imagen) }}" alt="" class="miniatura">
+                        <a href="{{ url_for('tienda.producto', producto_id=p.id) }}">{{ p.nombre }}</a>
+                    </div>
+                </td>
+                <td>{{ p.categoria }}</td>
+                <td>{{ p.precio | precio('COP') }}</td>
+                <td class="{% if p.stock == 0 %}texto-rojo{% elif p.stock <= 5 %}texto-alerta{% endif %}"><strong>{{ p.stock }}</strong></td>
+                <td><span class="estado {% if p.activo %}estado-entregado{% else %}estado-pausado{% endif %}">{{ 'Publicado' if p.activo else 'Pausado' }}</span></td>
+                <td>
+                    <div class="celda-acciones">
+                        <a href="{{ url_for('vendedor.editar_producto', producto_id=p.id) }}" class="boton boton-pequeno">Editar</a>
+                        <form method="POST" action="{{ url_for('vendedor.cambiar_activo', producto_id=p.id) }}">
+                            <input type="hidden" name="activo" value="{{ 0 if p.activo else 1 }}">
+                            <button type="submit" class="boton boton-pequeno boton-gris">{{ 'Pausar' if p.activo else 'Publicar' }}</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+    <div class="vacio">
+        <p>Aún no tienes productos publicados.</p>
+        <a href="{{ url_for('vendedor.nuevo_producto') }}" class="boton">Publicar mi primer producto</a>
+    </div>
+{% endif %}
+{% endblock %}

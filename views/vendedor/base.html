@@ -1,0 +1,20 @@
+{% extends "tienda/base.html" %}
+
+{% block contenido %}
+<section class="contenedor vendedor-layout">
+    <aside class="vendedor-menu">
+        <a href="{{ url_for('tienda.tienda_vendedor', vendedor_id=g.tienda.id) }}" class="vendedor-menu-tienda">
+            <span class="perfil-avatar perfil-avatar-pequeno">{{ g.tienda.nombre_tienda[0] }}</span>
+            <span><strong>{{ g.tienda.nombre_tienda }}</strong><span class="texto-suave">Ver mi tienda pública ›</span></span>
+        </a>
+        {% set ep = request.endpoint %}
+        <a href="{{ url_for('vendedor.panel') }}" class="{% if ep == 'vendedor.panel' %}activo{% endif %}">📊 Resumen</a>
+        <a href="{{ url_for('vendedor.productos') }}" class="{% if ep in ('vendedor.productos', 'vendedor.editar_producto') %}activo{% endif %}">📦 Catálogo e inventario</a>
+        <a href="{{ url_for('vendedor.nuevo_producto') }}" class="{% if ep == 'vendedor.nuevo_producto' %}activo{% endif %}">➕ Publicar producto</a>
+        <a href="{{ url_for('vendedor.envios') }}" class="{% if ep == 'vendedor.envios' %}activo{% endif %}">🚚 Pedidos y envíos</a>
+    </aside>
+    <div class="vendedor-contenido">
+        {% block panel %}{% endblock %}
+    </div>
+</section>
+{% endblock %}

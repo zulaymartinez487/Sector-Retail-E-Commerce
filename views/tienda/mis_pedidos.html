@@ -1,0 +1,65 @@
+{% extends "tienda/base.html" %}
+
+{% block titulo %}Mis pedidos - {{ app_name }}{% endblock %}
+
+{% set NOMBRES_PASARELA = {'tarjeta': 'Tarjeta', 'pse': 'PSE', 'nequi': 'Nequi', 'paypal': 'PayPal'} %}
+{% set PASOS = ['Pendiente', 'Preparando', 'Enviado', 'Entregado'] %}
+
+{% block contenido %}
+<section class="contenedor">
+    <h1 class="titulo-pagina">Mis pedidos</h1>
+
+    {% for pedido in pedidos %}
+        <article class="pedido">
+            <header class="pedido-encabezado">
+                <div><span class="texto-suave">Pedido</span><strong>#{{ pedido.id }}</strong></div>
+                <div><span class="texto-suave">Fecha</span><strong>{{ pedido.fecha_creacion.strftime('%d/%m/%Y') }}</strong></div>
+                <div><span class="texto-suave">Total pagado</span><strong>{{ pedido.total | precio(pedido.moneda) }}</strong></div>
+                <div><span class="texto-suave">Pago</span><strong>{{ NOMBRES_PASARELA.get(pedido.pasarela, pedido.pasarela) }}</strong></div>
+                <div class="pedido-ref"><span class="texto-suave">Referencia</span><code>{{ pedido.referencia_pago }}</code></div>
+            </header>
+
+            {% for envio in pedido.envios %}
+                <div class="envio">
+                    <div class="envio-encabezado">
+                        <span>🏪 <a href="{{ url_for('tienda.tienda_vendedor', vendedor_id=envio.vendedor_id) }}">{{ envio.nombre_tienda }}</a></span>
+                        <span class="texto-suave">
+                            🚚 {{ 'Express' if envio.modalidad == 'express' else 'Estándar' }}{% if envio.transportadora %} con {{ envio.transportadora }}{% endif %}
+                            {% if envio.numero_guia %} · Guía <code>{{ envio.numero_guia }}</code>{% endif %}
+                        </span>
+                    </div>
+
+                    <ol class="seguimiento">
+                        {% for paso in PASOS %}
+                            <li class="{% if loop.index0 <= envio.paso %}hecho{% endif %} {% if loop.index0 == envio.paso %}actual{% endif %}">{{ paso }}</li>
+                        {% endfor %}
+                    </ol>
+
+                    {% for item in envio.productos %}
+                        <div class="pedido-item">
+                            <img src="{{ url_for('static', filename=item.imagen) }}" alt="{{ item.nombre }}">
+                            <div>
+                                <a href="{{ url_for('tienda.producto', producto_id=item.producto_id) }}">{{ item.nombre }}</a>
+                                <span class="texto-suave">{{ item.cantidad }} × {{ item.precio_unitario | precio(pedido.moneda) }}</span>
+                            </div>
+                            <span class="texto-suave">{{ (item.cantidad * item.precio_unitario) | precio(pedido.moneda) }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <div class="desglose">
+                {% for concepto, valor in pedido.desglose %}
+                    <div class="resumen-fila {% if valor < 0 %}descuento{% endif %}"><span>{{ concepto }}</span><span>{{ valor | precio(pedido.moneda) }}</span></div>
+                {% endfor %}
+                <div class="resumen-fila resumen-total"><span>Total pagado</span><span>{{ pedido.total | precio(pedido.moneda) }}</span></div>
+            </div>
+        </article>
+    {% else %}
+        <div class="vacio">
+            <p>Todavía no has hecho ningún pedido.</p>
+            <a href="{{ url_for('tienda.inicio') }}" class="boton">Empezar a comprar</a>
+        </div>
+    {% endfor %}
+</section>
+{% endblock %}

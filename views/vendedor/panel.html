@@ -1,0 +1,63 @@
+{% extends "vendedor/base.html" %}
+
+{% block titulo %}Mi tienda - {{ app_name }}{% endblock %}
+
+{% block panel %}
+<h1 class="titulo-pagina">Resumen de {{ g.tienda.nombre_tienda }}</h1>
+
+<div class="metricas">
+    <div class="metrica"><span class="texto-suave">Total vendido</span><strong>{{ estadisticas.total_vendido | precio('COP') }}</strong></div>
+    <div class="metrica"><span class="texto-suave">Pedidos</span><strong>{{ estadisticas.pedidos }}</strong></div>
+    <div class="metrica {% if estadisticas.por_despachar %}metrica-alerta{% endif %}"><span class="texto-suave">Por despachar</span><strong>{{ estadisticas.por_despachar }}</strong></div>
+    <div class="metrica"><span class="texto-suave">Productos activos</span><strong>{{ estadisticas.activos }}</strong></div>
+</div>
+
+<div class="panel panel-transportadora">
+    <div>
+        <h2>🚚 Transportadora</h2>
+        <p class="texto-suave">Tus compradores eligen envío estándar o express; el costo y el formato de la guía los pone tu transportadora.</p>
+    </div>
+    <form method="POST" action="{{ url_for('vendedor.cambiar_transportadora') }}" class="form-transportadora">
+        <select name="transportadora" aria-label="Transportadora">
+            {% for t in transportadoras %}
+                <option value="{{ t.nombre }}" {% if t.nombre == g.tienda.transportadora %}selected{% endif %}>
+                    {{ t.nombre }} · {{ t.tarifa_base | precio('COP') }} · {{ t.dias_base }} días
+                </option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="boton boton-pequeno">Guardar</button>
+    </form>
+</div>
+
+<div class="panel">
+    <div class="panel-titulo">
+        <h2>Envíos por despachar</h2>
+        <a href="{{ url_for('vendedor.envios') }}">Ver todos ›</a>
+    </div>
+    {% for e in pendientes %}
+        <div class="fila-lista">
+            <span><strong>Pedido #{{ e.pedido_id }}</strong> · {{ e.comprador }}{% if e.ciudad %} · {{ e.ciudad }}{% endif %}</span>
+            <span class="texto-suave">{{ e.productos | length }} producto(s) · {{ e.subtotal | precio('COP') }}</span>
+            <span class="estado estado-{{ e.estado }}">{{ e.estado | capitalize }}</span>
+        </div>
+    {% else %}
+        <p class="texto-suave">No tienes envíos pendientes. 🎉</p>
+    {% endfor %}
+</div>
+
+<div class="panel">
+    <div class="panel-titulo">
+        <h2>Stock bajo (5 unidades o menos)</h2>
+        <a href="{{ url_for('vendedor.productos') }}">Inventario ›</a>
+    </div>
+    {% for p in stock_bajo %}
+        <div class="fila-lista">
+            <span><img src="{{ url_for('static', filename=p.imagen) }}" alt="" class="miniatura"> {{ p.nombre }}</span>
+            <span class="{% if p.stock == 0 %}texto-rojo{% else %}texto-suave{% endif %}">{{ p.stock }} en stock</span>
+            <a href="{{ url_for('vendedor.editar_producto', producto_id=p.id) }}" class="boton boton-pequeno">Reponer</a>
+        </div>
+    {% else %}
+        <p class="texto-suave">Todo tu inventario tiene stock suficiente.</p>
+    {% endfor %}
+</div>
+{% endblock %}

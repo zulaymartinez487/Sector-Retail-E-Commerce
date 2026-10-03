@@ -1,0 +1,55 @@
+{% extends "vendedor/base.html" %}
+
+{% block titulo %}{{ 'Publicar' if nuevo else 'Editar' }} producto - {{ app_name }}{% endblock %}
+
+{% block panel %}
+<h1 class="titulo-pagina">{{ 'Publicar producto' if nuevo else 'Editar producto' }}</h1>
+
+<form method="POST" enctype="multipart/form-data"
+      action="{{ url_for('vendedor.nuevo_producto') if nuevo else url_for('vendedor.editar_producto', producto_id=producto.id) }}"
+      class="panel formulario formulario-producto">
+    <div class="formulario-columnas">
+        <div>
+            <label>Nombre del producto
+                <input type="text" name="nombre" value="{{ producto.nombre or '' }}" required minlength="3" maxlength="150">
+            </label>
+            <label>Descripción
+                <textarea name="descripcion" rows="5" maxlength="2000" placeholder="Materiales, medidas, garantía...">{{ producto.descripcion or '' }}</textarea>
+            </label>
+            <div class="campos-3">
+                <label>Categoría
+                    <select name="categoria_id" required>
+                        <option value="">Elige...</option>
+                        {% for grupo, hojas in categorias %}
+                            <optgroup label="{{ grupo }}">
+                                {% for c in hojas %}
+                                    <option value="{{ c.id }}" {% if producto.categoria_id == c.id %}selected{% endif %}>{{ c.nombre }}</option>
+                                {% endfor %}
+                            </optgroup>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Precio (COP)
+                    <input type="number" name="precio" value="{{ (producto.precio | int) if producto.precio else '' }}" min="1000" step="100" required>
+                </label>
+                <label>Stock (unidades)
+                    <input type="number" name="stock" value="{{ producto.stock if producto.stock is not none and producto.stock != '' else '' }}" min="0" required>
+                </label>
+            </div>
+        </div>
+        <div>
+            <label>Foto del producto {% if not nuevo %}<span class="texto-suave">(opcional: deja vacío para conservar la actual)</span>{% endif %}
+                <input type="file" name="imagen" accept="image/jpeg,image/png,image/webp" {% if nuevo %}required{% endif %}>
+            </label>
+            {% if producto.imagen %}
+                <img src="{{ url_for('static', filename=producto.imagen) }}" alt="Foto actual" class="vista-previa">
+            {% endif %}
+            <p class="texto-suave">JPG, PNG o WEBP, máximo 5 MB. Se recomienda una foto cuadrada con fondo claro.</p>
+        </div>
+    </div>
+    <div class="formulario-acciones">
+        <a href="{{ url_for('vendedor.productos') }}" class="boton boton-gris">Cancelar</a>
+        <button type="submit" class="boton">{{ 'Publicar producto' if nuevo else 'Guardar cambios' }}</button>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends "tienda/base.html" %}
+
+{% block titulo %}Pago - {{ app_name }}{% endblock %}
+
+{% block contenido %}
+<section class="contenedor">
+    <h1 class="titulo-pagina">Finalizar compra</h1>
+
+    <div class="carrito">
+        <div class="checkout-pasos">
+
+            {# Paso 1: se envía por GET y recalcula el resumen (Bridge para el envío, Decorator para los extras). #}
+            <form method="GET" action="{{ url_for('tienda.checkout') }}" class="panel">
+                <div class="panel-titulo">
+                    <h2>1. Envío y extras</h2>
+                    <noscript><button type="submit" class="boton boton-pequeno">Actualizar resumen</button></noscript>
+                </div>
+
+                <div class="opciones-envio">
+                    {% for m in modalidades %}
+                        <label class="opcion-tarjeta {% if opciones.modalidad == m.codigo %}opcion-activa{% endif %}">
+                            <input type="radio" name="modalidad" value="{{ m.codigo }}" onchange="this.form.submit()"
+                                   {% if opciones.modalidad == m.codigo %}checked{% endif %}>
+                            <span class="opcion-nombre">{{ '📦' if m.codigo == 'estandar' else '⚡' }} {{ m.nombre }}</span>
+                            <span class="texto-suave">{{ 'Según la transportadora de cada tienda' if m.codigo == 'estandar' else 'Entrega en 1 a 2 días hábiles' }}</span>
+                            <strong>{% if m.envio == 0 %}<span class="gratis">Gratis</span>{% else %}{{ m.envio | precio }}{% endif %}</strong>
+                        </label>
+                    {% endfor %}
+                </div>
+
+                <div class="extras">
+                    <label class="extra">
+                        <input type="checkbox" name="regalo" value="1" onchange="this.form.submit()" {% if opciones.regalo %}checked{% endif %}>
+                        <span>🎁 Empaque de regalo <span class="texto-suave">+{{ precio_regalo | precio }}</span></span>
+                    </label>
+                    <label class="extra">
+                        <input type="checkbox" name="seguro" value="1" onchange="this.form.submit()" {% if opciones.seguro %}checked{% endif %}>
+                        <span>🛡️ Seguro de envío contra pérdida o daño <span class="texto-suave">2 % del valor de los productos</span></span>
+                    </label>
+                    <div class="extra extra-cupon">
+                        <label for="cupon">🏷️ Cupón</label>
+                        <input type="text" id="cupon" name="cupon" value="{{ opciones.cupon }}" placeholder="Ej: BIENVENIDA10" maxlength="20">
+                        <button type="submit" class="boton boton-pequeno boton-gris">Aplicar</button>
+                    </div>
+                    <p class="texto-suave">Cupones de prueba: {% for codigo, cupon in cupones.items() %}<code>{{ codigo }}</code> ({{ cupon[0] }}){{ ', ' if not loop.last }}{% endfor %}</p>
+                </div>
+            </form>
+
+            <form method="POST" action="{{ url_for('tienda.checkout') }}" id="form-pago" autocomplete="on">
+                {# Las opciones del paso 1 viajan ocultas para cobrar exactamente lo que se ve en el resumen. #}
+                <input type="hidden" name="modalidad" value="{{ opciones.modalidad }}">
+                {% if opciones.regalo %}<input type="hidden" name="regalo" value="1">{% endif %}
+                {% if opciones.seguro %}<input type="hidden" name="seguro" value="1">{% endif %}
+                {% if opciones.cupon_valido %}<input type="hidden" name="cupon" value="{{ opciones.cupon }}">{% endif %}
+
+                <div class="panel">
+                    <h2>2. Datos de entrega</h2>
+                    <div class="campos-2">
+                        <label>Dirección
+                            <input type="text" name="direccion" value="{{ form.direccion or '' }}" placeholder="Calle 10 # 20-30, apto 501" required minlength="5">
+                        </label>
+                        <label>Ciudad
+                            <input type="text" name="ciudad" value="{{ form.ciudad or '' }}" placeholder="Bogotá" required>
+                        </label>
+                        <label>Teléfono de contacto
+                            <input type="tel" name="telefono" value="{{ form.telefono or '' }}" placeholder="3001234567" required>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-titulo">
+                        <h2>3. Medio de pago</h2>
+                        <span class="texto-suave">Pagas en <b>{{ monedas[moneda_actual].nombre }} ({{ moneda_actual }})</b> · cámbiala arriba</span>
+                    </div>
+                    <p class="aviso-simulado">🧪 Pagos <b>simulados</b> con fines académicos: no se hace ningún cobro real. Tarjeta de prueba: <code>4242 4242 4242 4242</code> (aprobada) o <code>4000 0000 0000 0002</code> (rechazada).</p>
+
+                    {% for p in pasarelas %}
+                    {% set disponible = p.acepta(moneda_actual) %}
+                    <div class="pasarela {% if not disponible %}pasarela-no-disponible{% endif %}">
+                        <label class="pasarela-opcion">
+                            <input type="radio" name="pasarela" value="{{ p.codigo }}" required
+                                   {% if not disponible %}disabled{% endif %}
+                                   {% if form.pasarela == p.codigo or (not form.pasarela and loop.first) %}checked{% endif %}>
+                            <span class="pasarela-nombre">{{ p.nombre }}</span>
+                            <span class="texto-suave">{{ p.descripcion }}</span>
+                            <span class="pasarela-monedas">{{ p.monedas | join(' · ') }}</span>
+                        </label>
+                        {% if not disponible %}
+                            <p class="texto-suave pasarela-aviso">No disponible en {{ moneda_actual }}. Cambia la moneda a {{ p.monedas | join(' o ') }} para usarlo.</p>
+                        {% else %}
+                        <div class="pasarela-campos">
+                            {% if p.codigo == 'tarjeta' %}
+                                <div class="campos-2">
+                                    <label>Número de tarjeta<input type="text" name="tarjeta_numero" inputmode="numeric" autocomplete="cc-number" placeholder="4242 4242 4242 4242"></label>
+                                    <label>Nombre del titular<input type="text" name="tarjeta_titular" autocomplete="cc-name" placeholder="Como aparece en la tarjeta"></label>
+                                    <label>Vencimiento<input type="text" name="tarjeta_vencimiento" autocomplete="cc-exp" placeholder="MM/AA"></label>
+                                    <label>CVV<input type="password" name="tarjeta_cvv" inputmode="numeric" autocomplete="cc-csc" placeholder="123" maxlength="4"></label>
+                                </div>
+                            {% elif p.codigo == 'pse' %}
+                                <div class="campos-2">
+                                    <label>Banco
+                                        <select name="pse_banco">
+                                            <option value="">Selecciona tu banco</option>
+                                            {% for b in bancos %}<option>{{ b }}</option>{% endfor %}
+                                        </select>
+                                    </label>
+                                    <label>Tipo de persona
+                                        <select name="pse_tipo_persona">
+                                            <option value="natural">Natural</option>
+                                            <option value="juridica">Jurídica</option>
+                                        </select>
+                                    </label>
+                                    <label>Número de documento<input type="text" name="pse_documento" inputmode="numeric" placeholder="1012345678"></label>
+                                </div>
+                            {% elif p.codigo == 'nequi' %}
+                                <label>Celular registrado en Nequi<input type="tel" name="nequi_celular" placeholder="3001234567"></label>
+                            {% elif p.codigo == 'paypal' %}
+                                <label>Correo de tu cuenta PayPal<input type="email" name="paypal_correo" placeholder="tucorreo@ejemplo.com"></label>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </form>
+        </div>
+
+        <aside class="resumen">
+            <h2>Tu pedido</h2>
+            {% for grupo in resumen.grupos %}
+                <div class="resumen-tienda">
+                    <span class="texto-suave">🏪 {{ grupo.nombre_tienda }}</span>
+                    {% for item in grupo['items'] %}
+                        <div class="resumen-fila resumen-producto"><span>{{ item.nombre }} × {{ item.cantidad }}</span><span>{{ item.subtotal | precio }}</span></div>
+                    {% endfor %}
+                    <div class="resumen-fila resumen-producto texto-suave">
+                        <span>🚚 {{ grupo.envio_descripcion }}</span><span>{% if grupo.envio == 0 %}Gratis{% else %}{{ grupo.envio | precio }}{% endif %}</span>
+                    </div>
+                </div>
+            {% endfor %}
+
+            {# Desglose armado por el Decorator: una línea por cada capa aplicada. #}
+            <div class="desglose">
+                {% for concepto, valor in costo.desglose() %}
+                    <div class="resumen-fila {% if valor < 0 %}descuento{% endif %}"><span>{{ concepto }}</span><span>{{ valor | precio }}</span></div>
+                {% endfor %}
+            </div>
+            <div class="resumen-fila resumen-total"><span>Total a pagar</span><span>{{ costo.total() | precio }}</span></div>
+            {% if moneda_actual != 'COP' %}
+                <p class="texto-suave resumen-nota">Equivale a {{ costo.total() | precio('COP') }} a la tasa de referencia.</p>
+            {% endif %}
+            <button type="submit" form="form-pago" class="boton boton-bloque">🔒 Pagar {{ costo.total() | precio }}</button>
+            <a href="{{ url_for('tienda.carrito') }}" class="seguir-comprando">← Volver al carrito</a>
+        </aside>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "tienda/base.html" %}
+
+{% block titulo %}{{ vendedor.nombre_tienda }} - {{ app_name }}{% endblock %}
+
+{% block contenido %}
+<section class="contenedor">
+    <div class="perfil-tienda">
+        <span class="perfil-avatar">{{ vendedor.nombre_tienda[0] }}</span>
+        <div class="perfil-info">
+            <h1>{{ vendedor.nombre_tienda }}</h1>
+            <p>{{ vendedor.descripcion }}</p>
+            <p class="texto-suave">📍 {{ vendedor.ciudad }} · En {{ app_name }} desde {{ vendedor.fecha_creacion.strftime('%m/%Y') }}</p>
+        </div>
+        <div class="perfil-datos">
+            <div><strong>{{ productos | length }}</strong><span class="texto-suave">productos</span></div>
+        </div>
+    </div>
+
+    <h2 class="titulo-seccion">Productos de la tienda</h2>
+    {% if productos %}
+        <div class="grilla">
+            {% for p in productos %}
+                {% include "tienda/_tarjeta_producto.html" %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="vacio"><p>Esta tienda todavía no tiene productos publicados.</p></div>
+    {% endif %}
+</section>
+{% endblock %}

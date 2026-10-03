@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block titulo %}{{ app_name }}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tienda.css') }}">
+</head>
+<body>
+    <div class="aviso-superior">Marketplace multivendedor · Envío gratis desde {{ 150000 | precio }} por tienda · Paga con tarjeta, PSE, Nequi o PayPal</div>
+
+    <header class="encabezado">
+        <div class="encabezado-interno">
+            <a class="logo" href="{{ url_for('tienda.inicio') }}">☁️ {{ app_name }}</a>
+
+            <form class="buscador" action="{{ url_for('tienda.inicio') }}" method="GET">
+                <input type="search" name="q" placeholder="Buscar productos..." value="{{ busqueda or '' }}" aria-label="Buscar productos">
+                <button type="submit" aria-label="Buscar">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                </button>
+            </form>
+
+            <nav class="acciones">
+                <form method="POST" action="{{ url_for('tienda.cambiar_moneda') }}" class="selector-moneda">
+                    <input type="hidden" name="volver" value="{{ request.full_path }}">
+                    <select name="moneda" onchange="this.form.submit()" aria-label="Moneda">
+                        {% for codigo in monedas %}
+                            <option value="{{ codigo }}" {% if codigo == moneda_actual %}selected{% endif %}>{{ codigo }}</option>
+                        {% endfor %}
+                    </select>
+                    <noscript><button type="submit">Cambiar</button></noscript>
+                </form>
+                {% if mi_tienda %}
+                    <a href="{{ url_for('vendedor.panel') }}" class="accion accion-vender">🏪 <span>Mi tienda</span></a>
+                {% else %}
+                    <a href="{{ url_for('vendedor.registro') }}" class="accion accion-vender">🏪 <span>Vender</span></a>
+                {% endif %}
+                <a href="{{ url_for('tienda.mis_pedidos') }}" class="accion">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+                    <span>Hola, {{ session.usuario_nombre.split(' ')[0] }}</span>
+                </a>
+                <a href="{{ url_for('auth.logout') }}" class="accion accion-texto">Salir</a>
+                <a href="{{ url_for('tienda.carrito') }}" class="accion carrito-icono" aria-label="Carrito">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l2.4 12.2a2 2 0 0 0 2 1.8h8.2a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="10" cy="20.5" r="1.3"/><circle cx="18" cy="20.5" r="1.3"/></svg>
+                    {% if cantidad_carrito %}<span class="contador">{{ cantidad_carrito }}</span>{% endif %}
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+        {% if mensajes %}
+            <div class="mensajes">
+                {% for categoria, mensaje in mensajes %}
+                    <div class="mensaje mensaje-{{ categoria }}">{{ mensaje }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        {% block contenido %}{% endblock %}
+    </main>
+
+    <footer class="pie">
+        <div class="pie-interno">
+            <div>
+                <p class="logo">☁️ {{ app_name }}</p>
+                <p>Marketplace multivendedor: compra a tiendas de todo el país o abre la tuya.</p>
+            </div>
+            <div>
+                <h4>Tienda</h4>
+                <a href="{{ url_for('tienda.inicio') }}">Todos los productos</a>
+                <a href="{{ url_for('tienda.carrito') }}">Carrito</a>
+                <a href="{{ url_for('tienda.mis_pedidos') }}">Mis pedidos</a>
+            </div>
+            <div>
+                <h4>Vende con nosotros</h4>
+                {% if mi_tienda %}
+                    <a href="{{ url_for('vendedor.panel') }}">Panel de mi tienda</a>
+                    <a href="{{ url_for('vendedor.productos') }}">Mis productos</a>
+                    <a href="{{ url_for('vendedor.envios') }}">Envíos por despachar</a>
+                {% else %}
+                    <a href="{{ url_for('vendedor.registro') }}">Abre tu tienda gratis</a>
+                {% endif %}
+            </div>
+        </div>
+        <p class="pie-legal">© 2026 {{ app_name }} · Proyecto de patrones de diseño de software · Pagos simulados con fines académicos</p>
+    </footer>
+</body>
+</html>

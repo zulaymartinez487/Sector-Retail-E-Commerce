@@ -1,0 +1,80 @@
+{% extends "tienda/base.html" %}
+
+{% block contenido %}
+    {% if not busqueda and not categoria_actual %}
+    <section class="hero" style="background-image: url('{{ url_for('static', filename='img/banner.jpg') }}');">
+        <div class="hero-texto">
+            <span class="hero-etiqueta">Marketplace multivendedor</span>
+            <h1>Miles de productos, cientos de tiendas</h1>
+            <p>Compra a vendedores de todo el país en un solo carrito, con pago seguro.</p>
+            <a href="#catalogo" class="boton boton-claro">Ver productos</a>
+            {% if not mi_tienda %}
+                <a href="{{ url_for('vendedor.registro') }}" class="boton boton-borde">Vende con nosotros</a>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="beneficios">
+        <div><strong>🏪 Muchas tiendas</strong><span>Un solo carrito</span></div>
+        <div><strong>🚚 Envíos con guía</strong><span>Sigue cada paquete</span></div>
+        <div><strong>💳 Pagos flexibles</strong><span>Tarjeta, PSE, Nequi, PayPal</span></div>
+        <div><strong>🌎 Multimoneda</strong><span>COP, USD y EUR</span></div>
+    </section>
+
+    {% endif %}
+
+    <section class="contenedor" id="catalogo">
+        <div class="catalogo-encabezado">
+            <h2>
+                {% if busqueda %}Resultados para "{{ busqueda }}"
+                {% elif categoria_actual %}{{ categoria_actual }}
+                {% else %}Todos los productos{% endif %}
+            </h2>
+            <form method="GET" action="{{ url_for('tienda.inicio') }}" class="ordenar">
+                {% if busqueda %}<input type="hidden" name="q" value="{{ busqueda }}">{% endif %}
+                {% if categoria_actual %}<input type="hidden" name="categoria" value="{{ categoria_actual }}">{% endif %}
+                <span class="texto-suave">{{ productos | length }} producto{{ 's' if productos | length != 1 }} ·</span>
+                <select name="orden" onchange="this.form.submit()" aria-label="Ordenar">
+                    <option value="relevancia" {% if orden == 'relevancia' %}selected{% endif %}>Más relevantes</option>
+                    <option value="precio_asc" {% if orden == 'precio_asc' %}selected{% endif %}>Menor precio</option>
+                    <option value="precio_desc" {% if orden == 'precio_desc' %}selected{% endif %}>Mayor precio</option>
+                </select>
+            </form>
+        </div>
+
+        {# Navegación por el árbol de categorías (Composite): cada nodo sabe cuántos productos tiene debajo. #}
+        {% if nodo %}
+            <nav class="migas migas-categoria">
+                <a href="{{ url_for('tienda.inicio') }}#catalogo">Todo</a>
+                {% for c in nodo.ruta() %} › <a href="{{ url_for('tienda.inicio', categoria=c.nombre) }}#catalogo">{{ c.nombre }}</a>{% endfor %}
+                › <span>{{ nodo.nombre }}</span>
+            </nav>
+        {% endif %}
+        <div class="categorias">
+            {% set raiz_menu = nodo if (nodo and nodo.subcategorias()) else (nodo.padre if nodo else arbol) %}
+            {% if raiz_menu is sameas arbol %}
+                <a href="{{ url_for('tienda.inicio') }}#catalogo" class="chip {% if not nodo %}chip-activo{% endif %}">Todos <span class="chip-conteo">{{ arbol.contar_productos() }}</span></a>
+            {% else %}
+                <a href="{{ url_for('tienda.inicio', categoria=raiz_menu.nombre) }}#catalogo" class="chip {% if nodo is sameas raiz_menu %}chip-activo{% endif %}">Todo {{ raiz_menu.nombre }} <span class="chip-conteo">{{ raiz_menu.contar_productos() }}</span></a>
+            {% endif %}
+            {% for c in raiz_menu.subcategorias() if c.contar_productos() %}
+                <a href="{{ url_for('tienda.inicio', categoria=c.nombre) }}#catalogo" class="chip {% if nodo is sameas c %}chip-activo{% endif %}">
+                    {{ c.nombre }} <span class="chip-conteo">{{ c.contar_productos() }}</span>
+                </a>
+            {% endfor %}
+        </div>
+
+        {% if productos %}
+            <div class="grilla">
+                {% for p in productos %}
+                    {% include "tienda/_tarjeta_producto.html" %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="vacio">
+                <p>No encontramos productos{% if busqueda %} para "{{ busqueda }}"{% endif %}.</p>
+                <a href="{{ url_for('tienda.inicio') }}" class="boton">Ver todo el catálogo</a>
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}

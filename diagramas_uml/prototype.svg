@@ -1,0 +1,56 @@
+<svg viewBox="0 0 721 460" width="721" height="460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama UML del patrón Prototype: RegistroPlantillasCorreo cachea un CorreoBuilder prototipo y entrega clones independientes vía clonar()">
+<rect x="0" y="0" width="721" height="460" fill="#f5f7fa"/>
+
+<defs>
+  <marker id="gen" markerWidth="16" markerHeight="14" refX="15" refY="7" orient="auto">
+    <polygon points="0,0 16,7 0,14" fill="#ffffff" stroke="#1a2233" stroke-width="1.2"/>
+  </marker>
+  <marker id="dep" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto">
+    <polyline points="0,0 10,5 0,10" fill="none" stroke="#1a2233" stroke-width="1.3"/>
+  </marker>
+</defs>
+
+<line x1="340" y1="99.0" x2="402" y2="99.0" stroke="#1a2233" stroke-width="1.3" stroke-dasharray="5,4" marker-end="url(#dep)"/>
+<text x="375.0" y="89.0" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-style="italic" font-size="11.5" fill="#1a2233" opacity="0.8">«usa» clonar()</text>
+<g transform="translate(40,50)">
+<rect x="0" y="0" width="300" height="98" rx="6" fill="#ffffff" stroke="#1a2233" stroke-width="1.3"/>
+<text x="150.0" y="24" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700"  font-size="15" fill="#1a2233">RegistroPlantillasCorreo</text>
+<line x1="0" y1="40" x2="300" y2="40" stroke="#1a2233" stroke-width="1"/>
+<text x="14" y="54" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233" text-decoration="underline"><tspan fill="#1a2233" opacity="0.6">-</tspan> _prototipos: dict</text>
+<line x1="0" y1="69" x2="300" y2="69" stroke="#1a2233" stroke-width="1"/>
+<text x="14" y="83" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233" text-decoration="underline"><tspan fill="#1a2233" opacity="0.6">+</tspan> obtener_encabezado(): CorreoBuilder</text>
+</g>
+<g transform="translate(410,50)">
+<rect x="0" y="0" width="271" height="136" rx="6" fill="#ffffff" stroke="#1a2233" stroke-width="1.3"/>
+<text x="135.5" y="24" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700"  font-size="15" fill="#1a2233">CorreoBuilder</text>
+<line x1="0" y1="40" x2="271" y2="40" stroke="#1a2233" stroke-width="1"/>
+<text x="14" y="54" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233"><tspan fill="#1a2233" opacity="0.6">-</tspan> _partes: list</text>
+<line x1="0" y1="69" x2="271" y2="69" stroke="#1a2233" stroke-width="1"/>
+<text x="14" y="83" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233"><tspan fill="#1a2233" opacity="0.6">+</tspan> con_encabezado(): CorreoBuilder</text>
+<text x="14" y="102" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233"><tspan fill="#1a2233" opacity="0.6">+</tspan> clonar(): CorreoBuilder</text>
+<text x="14" y="121" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1a2233"><tspan fill="#1a2233" opacity="0.6">+</tspan> construir(): str</text>
+</g>
+<g transform="translate(40,256)">
+<rect x="0" y="0" width="248" height="34" rx="17" fill="#ffffff" stroke="#1a2233" stroke-width="1.1"/>
+<text x="124" y="21" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#1a2233">prototipo cacheado (encabezado)</text>
+</g>
+<path d="M288.1,273.0 C 333.1,273.0 333.1,249.0 378.1,249.0" fill="none" stroke="#1a2233" stroke-width="1.2" marker-end="url(#dep)"/>
+<path d="M288.1,273.0 C 333.1,273.0 333.1,307.0 378.1,307.0" fill="none" stroke="#1a2233" stroke-width="1.2" marker-end="url(#dep)"/>
+<text x="318.1" y="263.0" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" fill="#1a2233" opacity="0.65">clonar()</text>
+<text x="40" y="222" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" fill="#1a2233" opacity="0.75">Un prototipo, dos copias independientes:</text>
+<g transform="translate(378.1,232)">
+<rect x="0" y="0" width="149" height="34" rx="17" fill="#e7edf9" stroke="#1a2233" stroke-width="1.1"/>
+<text x="74" y="21" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#1e3c72">clon → bienvenida</text>
+</g>
+<g transform="translate(378.1,290)">
+<rect x="0" y="0" width="163" height="34" rx="17" fill="#e7edf9" stroke="#1a2233" stroke-width="1.1"/>
+<text x="81" y="21" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#1e3c72">clon → confirmación</text>
+</g>
+<g transform="translate(40,354)">
+<path d="M0,0 H391 L403,12 V76 H0 Z" fill="#eef1f6" stroke="#1a2233" stroke-width="1" opacity="0.97"/>
+<path d="M391,0 V12 H403" fill="none" stroke="#1a2233" stroke-width="1"/>
+<text x="12" y="20" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#1a2233" opacity="0.85">Cada clon es independiente (copy.deepcopy de _partes):</text>
+<text x="12" y="36" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#1a2233" opacity="0.85">seguir agregando piezas a un clon no afecta al prototipo</text>
+<text x="12" y="52" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#1a2233" opacity="0.85">cacheado ni a los demás clones que salieron de él.</text>
+</g>
+</svg>

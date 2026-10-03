@@ -1,0 +1,62 @@
+{% extends "vendedor/base.html" %}
+
+{% block titulo %}Pedidos y envíos - {{ app_name }}{% endblock %}
+
+{% block panel %}
+<h1 class="titulo-pagina">Pedidos y envíos</h1>
+
+<div class="categorias">
+    <a href="{{ url_for('vendedor.envios') }}" class="chip {% if not estado_actual %}chip-activo{% endif %}">Todos</a>
+    {% for e in estados %}
+        <a href="{{ url_for('vendedor.envios', estado=e) }}" class="chip {% if e == estado_actual %}chip-activo{% endif %}">{{ e | capitalize }}</a>
+    {% endfor %}
+</div>
+
+{% for envio in envios %}
+<article class="pedido">
+    <header class="pedido-encabezado">
+        <div><span class="texto-suave">Pedido</span><strong>#{{ envio.pedido_id }}</strong></div>
+        <div><span class="texto-suave">Fecha</span><strong>{{ envio.fecha_creacion.strftime('%d/%m/%Y') }}</strong></div>
+        <div><span class="texto-suave">Comprador</span><strong>{{ envio.comprador }}</strong></div>
+        <div><span class="texto-suave">Tu venta</span><strong>{{ envio.subtotal | precio('COP') }}</strong></div>
+        <span class="estado estado-{{ envio.estado }}">{{ envio.estado | capitalize }}</span>
+    </header>
+
+    <div class="envio">
+        <p class="texto-suave">📍 Enviar a: <b>{{ envio.direccion or 'Sin dirección' }}</b>{% if envio.ciudad %}, {{ envio.ciudad }}{% endif %} · 📞 {{ envio.telefono or '-' }}</p>
+        <p class="texto-suave">🚚 <b>{{ 'Express (1 a 2 días)' if envio.modalidad == 'express' else 'Estándar' }}</b>
+            con {{ envio.transportadora or g.tienda.transportadora }} · Envío cobrado: {{ envio.costo_envio | precio('COP') if envio.costo_envio else 'Gratis' }}</p>
+        {% for item in envio.productos %}
+            <div class="pedido-item">
+                <img src="{{ url_for('static', filename=item.imagen) }}" alt="{{ item.nombre }}">
+                <div><span>{{ item.nombre }}</span></div>
+                <span class="texto-suave">{{ item.cantidad }} × {{ item.precio_unitario | precio('COP') }}</span>
+            </div>
+        {% endfor %}
+
+        {% if envio.estado != 'entregado' %}
+        <form method="POST" action="{{ url_for('vendedor.actualizar_envio', envio_id=envio.id) }}" class="form-envio">
+            <input type="hidden" name="volver" value="{{ request.full_path }}">
+            <label>Estado
+                <select name="estado">
+                    {% for e in estados %}
+                        {% if loop.index0 >= envio.paso %}
+                            <option value="{{ e }}" {% if e == envio.estado %}selected{% endif %}>{{ e | capitalize }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Número de guía <span class="texto-suave">(vacío = la genera {{ envio.transportadora or g.tienda.transportadora }})</span>
+                <input type="text" name="numero_guia" value="{{ envio.numero_guia or '' }}" maxlength="60" placeholder="Automática">
+            </label>
+            <button type="submit" class="boton boton-pequeno">Actualizar envío</button>
+        </form>
+        {% else %}
+            <p class="texto-suave">✔ Entregado · {{ envio.transportadora }} · guía {{ envio.numero_guia }}</p>
+        {% endif %}
+    </div>
+</article>
+{% else %}
+    <div class="vacio"><p>No hay envíos{% if estado_actual %} en estado "{{ estado_actual }}"{% endif %}.</p></div>
+{% endfor %}
+{% endblock %}

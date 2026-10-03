@@ -1,0 +1,34 @@
+{% extends "tienda/base.html" %}
+
+{% block titulo %}Abre tu tienda - {{ app_name }}{% endblock %}
+
+{% block contenido %}
+<section class="contenedor contenedor-angosto">
+    <div class="panel">
+        <h1>🏪 Abre tu tienda en {{ app_name }}</h1>
+        <p class="texto-suave">Publica tus productos, recibe pedidos de todo el país y construye tu reputación con las reseñas de tus compradores. Es gratis.</p>
+
+        <form method="POST" action="{{ url_for('vendedor.registro') }}" class="formulario">
+            <label>Nombre de la tienda
+                <input type="text" name="nombre_tienda" value="{{ form.nombre_tienda or '' }}" required minlength="3" maxlength="100" placeholder="Ej: Accesorios Andinos">
+            </label>
+            <label>Descripción corta
+                <input type="text" name="descripcion" value="{{ form.descripcion or '' }}" maxlength="255" placeholder="¿Qué vendes?">
+            </label>
+            <label>Ciudad desde donde despachas
+                <input type="text" name="ciudad" value="{{ form.ciudad or '' }}" required maxlength="80" placeholder="Ej: Medellín">
+            </label>
+            <label>Transportadora con la que despachas
+                <select name="transportadora" required>
+                    {% for t in transportadoras %}
+                        <option value="{{ t.nombre }}" {% if form.transportadora == t.nombre %}selected{% endif %}>
+                            {{ t.nombre }} · tarifa {{ t.tarifa_base | precio('COP') }} · {{ t.dias_base }} días
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
+            <button type="submit" class="boton">Abrir mi tienda</button>
+        </form>
+    </div>
+</section>
+{% endblock %}
